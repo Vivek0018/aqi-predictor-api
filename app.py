@@ -1,4 +1,3 @@
-# main.py
 
 from fastapi import FastAPI
 
@@ -1097,7 +1096,7 @@ async def root():
 
 @app.get('/city')
 async def city():
-    o = Ozon3("a36388df93e27e7fb00282d007eae2e68c561a61")
+    o = Ozon3('a36388df93e27e7fb00282d007eae2e68c561a61')
     hist = o.get_historical_data(city_name='Delhi')
     #get the predictions 
     # predictions = forecaster.getForecastData(data=hist)

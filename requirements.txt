@@ -13,3 +13,10 @@ sqlparse==0.4.4
 sseclient==0.0.27
 fastapi
 uvicorn
+requests
+json
+typing
+datetime
+sys
+itertools
+warnings
