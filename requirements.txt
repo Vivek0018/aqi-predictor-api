@@ -1,5 +1,4 @@
 dateparser==1.2.0
-Django==4.2.7
 Js2Py==0.74
 jschema-to-python==1.2.3
 jsonpatch==1.33
@@ -9,9 +8,7 @@ jsonschema==4.19.2
 jsonschema-specifications==2023.11.1
 numpy==1.26.2
 pandas==2.1.3
-prophet==1.1.5
 ratelimit==2.2.1
-sktime==0.24.1
 sqlparse==0.4.4
 sseclient==0.0.27
 fastapi
