@@ -22,6 +22,8 @@ uvicorn = "*"
 requests = "*"
 typing = "*"
 datetime = "*"
+sktime = "*"
+prophet = "*"
 
 [dev-packages]
 
