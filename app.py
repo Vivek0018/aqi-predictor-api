@@ -1007,30 +1007,6 @@ class Ozon3:
 
         return [df ,city , station_name, country_code]
 
-    def get_city_forecast(
-        self,
-        city: str,
-        df: pandas.DataFrame = pandas.DataFrame(),
-    ) -> pandas.DataFrame:
-        """Get a city's air quality forecast
-
-        Args:
-            city (str): The city to get data for.
-            df (pandas.DataFrame, optional): An existing dataframe to
-                append the data to.
-
-        Returns:
-            pandas.DataFrame: The dataframe containing the data.
-        """
-        r = self._make_api_request(f"{self._search_aqi_url}/{city}/?token={self.token}")
-        data_obj = self._check_and_get_data_obj(r)
-
-        df = self._extract_forecast_data(data_obj)
-        if "pm25" in df.columns:
-            # This ensures that pm25 data is labelled correctly.
-            df.rename(columns={"pm25": "pm2.5"}, inplace=True)
-
-        return df
 
 
 # def getCityData(city_name):
@@ -1097,7 +1073,7 @@ async def root():
 @app.get('/city')
 async def city():
     o = Ozon3('a36388df93e27e7fb00282d007eae2e68c561a61')
-    hist = o.get_historical_data(city_name='Delhi')
+    hist = o.get_historical_data(city='Delhi')
     #get the predictions 
     # predictions = forecaster.getForecastData(data=hist)
 

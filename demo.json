@@ -1,0 +1,283 @@
+{
+  "dt": "16.538187ms",
+  "term": "delhi",
+  "results": [
+    {
+      "s": {
+        "a": "203",
+        "t": ["2023-12-07 16:00:00", "+05:30"],
+        "n": ["Delhi Institute of Tool Engineering, Wazirpur, Delhi"],
+        "u": "delhi/delhi-institute-of-tool-engineering--wazirpur"
+      },
+      "n": [
+        "Delhi Institute of Tool Engineering, Wazirpur, Delhi, Delhi, India"
+      ],
+      "score": 7,
+      "x": 10114,
+      "c": "IN",
+      "z": 0,
+      "$": "realtime"
+    },
+    {
+      "s": {
+        "a": "216",
+        "t": ["2023-12-07 16:00:00", "+05:30"],
+        "n": ["Punjabi Bagh, Delhi"],
+        "u": "delhi/punjabi-bagh"
+      },
+      "n": ["Punjabi Bagh, Delhi, Delhi, India"],
+      "score": 5,
+      "x": 2555,
+      "c": "IN",
+      "z": 0,
+      "$": "realtime"
+    },
+    {
+      "s": {
+        "a": "210",
+        "t": ["2023-12-07 16:00:00", "+05:30"],
+        "n": ["Satyawati College, Delhi"],
+        "u": "delhi/satyawati-college"
+      },
+      "n": ["Satyawati College, Delhi, Delhi, India"],
+      "score": 5,
+      "x": 10115,
+      "c": "IN",
+      "z": 0,
+      "$": "realtime"
+    },
+    {
+      "s": {
+        "a": "200",
+        "t": ["2023-12-07 16:00:00", "+05:30"],
+        "n": ["ITI Jahangirpuri, Delhi"],
+        "u": "delhi/iti-jahangirpuri"
+      },
+      "n": ["ITI Jahangirpuri, Delhi, Delhi, India"],
+      "score": 5,
+      "x": 10113,
+      "c": "IN",
+      "z": 0,
+      "$": "realtime"
+    },
+    {
+      "s": {
+        "a": "195",
+        "t": ["2023-12-07 16:00:00", "+05:30"],
+        "n": ["Sonia Vihar Water Treatment Plant DJB, Delhi"],
+        "u": "delhi/sonia-vihar-water-treatment-plant-djb"
+      },
+      "n": ["Sonia Vihar Water Treatment Plant DJB, Delhi, Delhi, India"],
+      "score": 5,
+      "x": 10121,
+      "c": "IN",
+      "z": 0,
+      "$": "realtime"
+    },
+    {
+      "s": {
+        "a": "193",
+        "t": ["2023-12-07 15:00:00", "+05:30"],
+        "n": ["New Delhi US Embassy", "नई दिल्ली अमेरिकी दूतावास"],
+        "u": "india/new-delhi/us-embassy"
+      },
+      "n": ["New Delhi US Embassy, India"],
+      "score": 5,
+      "x": 7024,
+      "c": "IN",
+      "z": 0,
+      "$": "realtime"
+    },
+    {
+      "s": {
+        "a": "190",
+        "t": ["2023-12-07 16:00:00", "+05:30"],
+        "n": ["Pusa, Delhi"],
+        "u": "delhi/pusa"
+      },
+      "n": ["Pusa, Delhi, Delhi, India"],
+      "score": 5,
+      "x": 10124,
+      "c": "IN",
+      "z": 0,
+      "$": "realtime"
+    },
+    {
+      "s": {
+        "a": "186",
+        "t": ["2023-12-07 16:00:00", "+05:30"],
+        "n": ["Alipur, Delhi"],
+        "u": "delhi/alipur"
+      },
+      "n": ["Alipur, Delhi, Delhi, India"],
+      "score": 5,
+      "x": 11266,
+      "c": "IN",
+      "z": 0,
+      "$": "realtime"
+    },
+    {
+      "s": {
+        "a": "186",
+        "t": ["2023-12-07 16:00:00", "+05:30"],
+        "n": ["Mundka, Delhi"],
+        "u": "delhi/mundka"
+      },
+      "n": ["Mundka, Delhi, Delhi, India"],
+      "score": 5,
+      "x": 10708,
+      "c": "IN",
+      "z": 0,
+      "$": "realtime"
+    },
+    {
+      "s": {
+        "a": "186",
+        "t": ["2023-12-07 16:00:00", "+05:30"],
+        "n": ["Narela, Delhi"],
+        "u": "delhi/narela"
+      },
+      "n": ["Narela, Delhi, Delhi, India"],
+      "score": 5,
+      "x": 10706,
+      "c": "IN",
+      "z": 0,
+      "$": "realtime"
+    },
+    {
+      "s": {
+        "a": "179",
+        "t": ["2023-12-07 16:00:00", "+05:30"],
+        "n": ["R.K. Puram, Delhi"],
+        "u": "delhi/r.k.-puram"
+      },
+      "n": ["R.K. Puram, Delhi, Delhi, India"],
+      "score": 5,
+      "x": 2556,
+      "c": "IN",
+      "z": 0,
+      "$": "realtime"
+    },
+    {
+      "s": {
+        "a": "-",
+        "t": ["2018-04-20 00:00:00", "+05:30"],
+        "n": ["Burari Crossing, Delhi"],
+        "u": "delhi/burari-crossing"
+      },
+      "n": ["Burari Crossing, Delhi, Delhi, India"],
+      "score": 5,
+      "x": 10125,
+      "c": "IN",
+      "z": 0,
+      "$": "realtime"
+    },
+    {
+      "s": {
+        "a": "-",
+        "t": ["2018-04-13 11:00:00", "+05:30"],
+        "n": ["North Campus, Delhi"],
+        "u": "delhi/north-campus"
+      },
+      "n": ["North Campus, Delhi, Delhi, India"],
+      "score": 5,
+      "x": 10127,
+      "c": "IN",
+      "z": 0,
+      "$": "realtime"
+    },
+    {
+      "s": {
+        "a": "-",
+        "t": ["2020-09-20 20:00:00", "+05:30"],
+        "n": ["IHBAS, Delhi"],
+        "u": "delhi/ihbas"
+      },
+      "n": ["IHBAS, Delhi, Delhi, India"],
+      "score": 5,
+      "x": 8180,
+      "c": "IN",
+      "z": 0,
+      "$": "realtime"
+    },
+    {
+      "s": {
+        "a": "-",
+        "t": null,
+        "n": ["Civil Lines, Delhi"],
+        "u": "delhi/civil-lines"
+      },
+      "n": ["Civil Lines, Delhi, Delhi, India"],
+      "score": 5,
+      "x": 2558,
+      "c": "IN",
+      "z": 0,
+      "$": "realtime"
+    },
+    {
+      "s": { "a": "-", "t": null, "n": ["ITO, Delhi"], "u": "delhi/ito" },
+      "n": ["ITO, Delhi, Delhi, India"],
+      "score": 5,
+      "x": 3715,
+      "c": "IN",
+      "z": 0,
+      "$": "realtime"
+    },
+    {
+      "s": {
+        "a": "-",
+        "t": ["2018-04-19 11:00:00", "+05:30"],
+        "n": ["Siri Fort, Delhi"],
+        "u": "delhi/siri-fort"
+      },
+      "n": ["Siri Fort, Delhi, Delhi, India"],
+      "score": 5,
+      "x": 9291,
+      "c": "IN",
+      "z": 0,
+      "$": "realtime"
+    },
+    {
+      "s": {
+        "a": "-",
+        "t": ["2018-04-20 00:00:00", "+05:30"],
+        "n": ["IGI Airport Terminal-3, Delhi"],
+        "u": "delhi/igi-airport-terminal-3"
+      },
+      "n": ["IGI Airport Terminal-3, Delhi, Delhi, India"],
+      "score": 5,
+      "x": 10128,
+      "c": "IN",
+      "z": 0,
+      "$": "realtime"
+    },
+    {
+      "s": {
+        "a": "-",
+        "t": ["2023-09-27 10:00:00", "-06:00"],
+        "n": ["Museo del Rehilete, Hgo"],
+        "u": "mexico/hgo/museo-del-rehilete"
+      },
+      "n": ["Museo del Rehilete, Hgo, Mexico"],
+      "score": 5,
+      "x": 8011,
+      "c": "MX",
+      "z": 0,
+      "$": "realtime"
+    },
+    {
+      "s": {
+        "a": "-",
+        "t": ["2018-04-20 00:00:00", "+05:30"],
+        "n": ["CRRI Mathura Road, Delhi"],
+        "u": "delhi/crri-mathura-road"
+      },
+      "n": ["CRRI Mathura Road, Delhi, Delhi, India"],
+      "score": 5,
+      "x": 10123,
+      "c": "IN",
+      "z": 0,
+      "$": "realtime"
+    }
+  ]
+}

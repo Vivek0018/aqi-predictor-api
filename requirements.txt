@@ -14,9 +14,5 @@ sseclient==0.0.27
 fastapi
 uvicorn
 requests
-json==1.6.1
 typing
 datetime
-sys
-itertools
-warnings
