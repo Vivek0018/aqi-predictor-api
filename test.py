@@ -502,8 +502,10 @@ async def root():
     return {"message": "Hello World"}
 
 @app.get('/city/{city}')
-async def city():
+async def city(city:str):
     o = AQIData()
+    print('---------------------')
+    print(city)
     hist = getCityData(city_name=city)
     #get the predictions 
     # predictions = forecaster.getForecastData(data=hist)
