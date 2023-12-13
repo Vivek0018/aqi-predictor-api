@@ -501,13 +501,11 @@ app = FastAPI()
 async def root():
     return {"message": "Hello World"}
 
-@app.get('/city/')
+@app.get('/city/{city}')
 async def city():
     o = AQIData()
-    hist = getCityData(city_name='Delhi')
+    hist = getCityData(city_name=city)
     #get the predictions 
     # predictions = forecaster.getForecastData(data=hist)
 
-    print('_______________________')
-    print(type(hist))
     return hist
