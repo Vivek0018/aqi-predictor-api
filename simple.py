@@ -1,9 +1,5 @@
 from sktime.forecasting.base import ForecastingHorizon
 from sktime.forecasting.fbprophet import Prophet
-from fastapi import FastAPI
-from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
 import pandas
 import requests
 from datetime import datetime, timedelta
@@ -496,27 +492,8 @@ def getCityData(city_name):
             'code' : 404
         }
 
-    return finalOut
+    print(finalOut)
 
-app = FastAPI()
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-)
-
-@app.get("/hello", tags=['ROOT'])
-async def root():
-    # return JSONResponse()
-    json_compatible_item_data = jsonable_encoder({"message": "Hello World"})
-    return JSONResponse(content=json_compatible_item_data)
-
-@app.get('/city/{city}')
-async def city(city:str):
-    o = AQIData()
-    hist = getCityData(city_name=city)
-    #get the predictions 
-    # predictions = forecaster.getForecastData(data=hist)
-
-    return JSONResponse(hist)
+if __name__ == "__main__":
+    city = input('Enter any city Name : ')
+    getCityData(city_name=city)
