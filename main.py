@@ -1,16 +1,28 @@
-from sktime.forecasting.base import ForecastingHorizon
-from sktime.forecasting.fbprophet import Prophet
-# from sktime.forecasting.theta import ThetaForecaster85yy
 from fastapi import FastAPI
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-import pandas
 import requests
 from datetime import datetime, timedelta
 from sseclient import SSEClient
 import json
 import js2py
+# import seaborn as sns
+from io import BytesIO
+import base64
+
+
+from sktime.forecasting.base import ForecastingHorizon
+# from sktime.forecasting.model_selection import temporal_train_test_split
+from sktime.performance_metrics.forecasting import mean_absolute_error,mean_squared_error,mean_absolute_percentage_error,mean_squared_percentage_error,median_absolute_percentage_error
+import pandas as pd
+from sklearn.metrics import mean_absolute_error
+from sktime.forecasting.arima import AutoARIMA
+from sktime.forecasting.fbprophet import Prophet
+# from sktime.forecasting.naive import NaiveForecaster
+from sktime.forecasting.exp_smoothing import ExponentialSmoothing
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 class AQIData:
@@ -189,7 +201,9 @@ class AQIData:
     # def __init__(self, token:str = '') -> None:
     #     self.token = token
 
-    def parse_incoming_result(self, json_object: dict) -> pandas.DataFrame:
+    def parse_incoming_result(self, json_object: dict) -> pd.DataFrame:
+
+        print('Parsing the results from API')
         # Run JS code
         # Function is defined within JS code above
         # Convert result to Python dict afterwards
@@ -210,14 +224,15 @@ class AQIData:
                 dates.append(date)
                 values.append(value)
 
-            series = pandas.Series(values, index=dates)
+            series = pd.Series(values, index=dates)
             result_dict[pollutant_name] = series
 
-        FRAME = pandas.DataFrame(result_dict)
+        FRAME = pd.DataFrame(result_dict)
         return FRAME
 
         
     def get_results_from_backend(self, city_id: int):
+        print("Geting results from API")
         event_data_url = f"https://api.waqi.info/api/attsse/{city_id}/yd.json"
 
         r = requests.get(event_data_url)
@@ -246,9 +261,9 @@ class AQIData:
         return result
 
 
-    def get_data_from_id(self, city_id: int) -> pandas.DataFrame:
+    def get_data_from_id(self, city_id: int) -> pd.DataFrame:
         backend_data = self.get_results_from_backend(city_id)
-        result = pandas.concat([self.parse_incoming_result(data) for data in backend_data])
+        result = pd.concat([self.parse_incoming_result(data) for data in backend_data])
         # result = parse_incoming_result(backend_data[0])
 
         # Arrange to make most recent appear on top of DataFrame
@@ -262,7 +277,7 @@ class AQIData:
         # reindex empty dataframe i.e. just in case the returned
         # response AQI data was empty.
         if len(result) > 1:
-            complete_days = pandas.date_range(
+            complete_days = pd.date_range(
                 result.index.min(), result.index.max(), freq="D"
             )
             result = result.reindex(complete_days, fill_value=None)
@@ -273,13 +288,14 @@ class AQIData:
         return result
 
     
-    def get_city_station_options(self, city: str) -> pandas.DataFrame:
+    def get_city_station_options(self, city: str) -> pd.DataFrame:
+        print('Getting Station options in the city')
         """Get available stations for a given city
         Args:
             city (str): Name of a city.
 
         Returns:
-            pandas.DataFrame: Table of stations and their relevant information.
+            pd.DataFrame: Table of stations and their relevant information.
         """
         # NOTE, HACK, FIXME:
         # This functionality was born together with historical data feature.
@@ -299,7 +315,7 @@ class AQIData:
             city_url.append(candidate["s"].get("u"))
             score.append(candidate["score"])
 
-        return pandas.DataFrame(
+        return pd.DataFrame(
             {
                 "city_id": city_id,
                 "country_code": country_code,
@@ -312,7 +328,9 @@ class AQIData:
 
     def get_historical_data(
         self, city: str = None, city_id: int = None  # type: ignore
-    ) -> pandas.DataFrame:
+    ) -> pd.DataFrame:
+        
+        print(f'Getting Historical Data of {city}')
         """Get historical air quality data for a city
 
         Args:
@@ -321,7 +339,7 @@ class AQIData:
                 If not given, city argument must not be None.
 
         Returns:
-            pandas.DataFrame: The dataframe containing the data.
+            pd.DataFrame: The dataframe containing the data.
         """
         if city_id is None:
             if city is None:
@@ -348,6 +366,14 @@ class AQIData:
         # print(df)
 
         return [df ,city , station_name, country_code]
+    
+
+# class Forecasters(dataset):
+#     def __init__(self):
+#         self.dataset = dataset
+    
+#     def Prophet(self):
+#         forecaster = Prophet(yearly_seasonality=True, weekly_seasonality=True)
 
 
 def sktime_forecast(dataset, horizon=30, validation=False, confidence=0.9, frequency="D"):
@@ -363,12 +389,15 @@ def sktime_forecast(dataset, horizon=30, validation=False, confidence=0.9, frequ
     """
 
     forecaster = Prophet(yearly_seasonality=True, weekly_seasonality=True)
-    # Adjust frequency
+    # Adjust frequency of index(dates)
     forecast_df = dataset.resample(rule=frequency).sum()
     # Interpolate missing periods (if any)
     forecast_df = forecast_df.interpolate(method="time")
 
     all_parameters_values = {}
+
+    #to store plot images
+    plotImages = {}
     for col in dataset.columns:
         # Use train/test split to validate forecaster
         if validation:
@@ -396,7 +425,7 @@ def sktime_forecast(dataset, horizon=30, validation=False, confidence=0.9, frequ
             #to start predictions from tomorrow
             present_date = str(present_date + timedelta(days=1)).split(' ')[0]
             fh = ForecastingHorizon(
-                pandas.date_range(str(present_date), periods=horizon, freq=frequency),
+                pd.date_range(str(present_date), periods=horizon, freq=frequency),
                 is_relative=False,
             )
 
@@ -406,23 +435,46 @@ def sktime_forecast(dataset, horizon=30, validation=False, confidence=0.9, frequ
 
         # Visualize results
         # plt.plot(
-        #     df.tail(horizon * 3),
-        #     label="Actual",
+        #     df.tail(horizon),
+        #     label="Actual",h
         #     color="black",
         # )
         # plt.gca().fill_between(
         #     ci.index, (ci.iloc[:, 0]), (ci.iloc[:, 1]), color="b", alpha=0.1
         # )
-        # # print(y_pred)
-        # plt.plot(y_pred, label="Predicted")
-        # plt.xticks(rotation=45, ha='right')
-        # # plt.title(
-        # #     f"{horizon} day forecast for {col} (mae: {round(mae, 2)}, confidence: {confidence*100}%)"
-        # # )
-        # plt.ylim(bottom=0)
+        # print(y_pred)
+        # plt.imshow(y_pred, cmap='hot', interpolation='nearest')
+        # # plt.plot(y_pred, label="Predicted")
+        # # plt.xticks(rotation=30, ha='right')
+        # # # plt.title(
+        # # #     f"{horizon} day forecast for {col} (mae: {round(mae, 2)}, confidence: {confidence*100}%)"
+        # # # )
+        # # plt.ylim(bottom=0)
         # # plt.legend()
-        # plt.grid(False)
+        # # plt.grid(False)
         # plt.show()
+        # print(y_pred)
+            
+        # # data = np.random.rand(10, 10)
+
+        # # Create heatmap
+        # # plt.imshow(data, cmap='hot', interpolation='nearest')
+        # # plt.colorbar()  # Add color bar indicating the scale
+        # # plt.show()
+
+        # plt.figure(figsize=(8, 6))  # Adjust the figure size if needed
+        # sns.heatmap(y_pred, annot=True, cmap='coolwarm', linewidths=.5)
+        # plt.title('Heatmap of DataFrame')
+        # plt.show()
+
+        # buffer = BytesIO()
+        # # plt.savefig(buffer, format='png')
+        # buffer.seek(0)
+        # image_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+        # buffer.close()
+
+        # plotImages[col] = image_base64
+        # print(image_base64)
         # print("Mean Absolute Error : ", mae)
 
         # try :
@@ -443,8 +495,222 @@ def sktime_forecast(dataset, horizon=30, validation=False, confidence=0.9, frequ
             temp[param] = all_parameters_values[param][date]
         predicted_data[dates[date]] = temp
     
-    return predicted_data
+    return [predicted_data, plotImages]
 
+
+
+class Sktime_forecast:
+    def __init__(self, dataset) -> None:
+        self.dataset = dataset
+        self.frequency = 'D'
+        self.dataset = self.dataset.resample(rule=self.frequency).sum()
+        print(self.dataset)
+        # Interpolate missing periods (if any)
+        self.dataset = self.dataset.interpolate(method="time")
+        print(self.dataset)
+        self.horizon = 30
+        # self.validation = False
+        self.confidence = 0.9 
+
+        self.y_train = self.dataset[:-30]
+        self.y_test = self.dataset.tail(30)
+
+        self.fh_train = ForecastingHorizon(self.y_test.index, is_relative=False)
+
+        #for present date
+        present_date = datetime.now().date()
+        #to start predictions from tomorrow
+        present_date = str(present_date + timedelta(days=1)).split(' ')[0]
+
+        self.fh_pred = ForecastingHorizon(pd.date_range(str(present_date), periods=30, freq='D'),is_relative=False)
+
+    def getAccuracyMetrics(self, forecaster, forecaster_name):
+        print('-----------------------------------------------------------')
+        print(f'\nStarted Calculating Accuracy metrics for {forecaster_name}')
+        performance_metrics = {}
+        for param in self.y_train:
+            forecaster.fit(self.y_train[param])
+            y_pred = forecaster.predict(self.fh_train)
+            # ci = forecaster.predict_interval(fh, coverage=0.9).astype("float")
+            y_true = self.dataset[param].tail(30)
+
+            mae = mean_absolute_error(y_true, y_pred)
+            mape = mean_absolute_percentage_error(y_true, y_pred)
+            mse = mean_squared_error(y_true, y_pred)
+            rmse = np.sqrt(mse)
+            mspe = mean_squared_percentage_error(y_true, y_pred)    
+            mape = median_absolute_percentage_error(y_true, y_pred)
+            # r2_score_ = r2_score(y_true, y_pred)
+
+            performance_metrics[param] = {
+                'mae': mae,
+                'mape': mape,
+                'mse': mse,
+                'rmse': rmse,
+                'mspe': mspe,
+                'mape': mape
+            }
+
+        print(f'Calculated Accuracy metrics for {forecaster_name}')
+        return performance_metrics
+    
+    def getPredictions(self, forecaster, forecaster_name):
+        print(f'Started making Predictions using {forecaster_name} Model')
+        predictions = {}
+        plots = {}
+
+        for param in self.dataset:
+            forecaster.fit(self.dataset[param])
+
+            y_pred = forecaster.predict(self.fh_pred)
+
+            # predictions[param] = y_pred
+
+            for i in self.fh_pred:
+                try:
+                    predictions[i.strftime('%Y-%m-%d')][param] = y_pred[i]
+                except:
+                    predictions[i.strftime('%Y-%m-%d')] = {}
+                    predictions[i.strftime('%Y-%m-%d')][param] = y_pred[i]
+            
+
+            # to clear the plot
+            plt.clf()
+
+            plt.figure()
+            # Visualize results
+            plt.plot(
+                self.dataset[param].tail(100),
+                label="Actual",
+                color='black'
+            )
+            # plt.gca().fill_between(
+            #     ci.index, (ci.iloc[:, 0]), (ci.iloc[:, 1]), color="b", alpha=0.1
+            # )
+            # plt.imshow(y_pred, cmap='hot', interpolation='nearest')
+            plt.plot(
+                y_pred, 
+                label="Predicted",
+            )
+            plt.xticks(rotation=30, ha='right')
+            # plt.title(
+            #     f"{horizon} day forecast for {col} (mae: {round(mae, 2)}, confidence: {confidence*100}%)"
+            # )
+            plt.ylim(bottom=0)
+            plt.legend()
+            plt.grid(False)
+
+            # plt.show()
+
+            #converting plot into a image
+            buffer = BytesIO()
+            plt.savefig(buffer, format='png')
+            buffer.seek(0)
+            image_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+            buffer.close()
+
+            plots[param] = image_base64
+
+
+        print(f'Predictions using {forecaster_name} Model are Done!')
+        print('-----------------------------------------------------------')
+
+        return predictions, plots
+    
+
+    def getAQIForecasts(self, model):
+        print('Forecaster Started')
+        
+        forecasters = {
+            'prophet' :{
+                'name' : 'Prophet',
+                'forecaster' : Prophet(yearly_seasonality=True, weekly_seasonality=True),
+            },
+            'exponentialsmoothening' : {
+                'name' : 'Exponential Smoothening',
+                'forecaster': ExponentialSmoothing(trend="mul", seasonal="mul", sp=12)
+            },
+            'autoarima': {
+                'name' : 'ARIMA (Auto Regressive Integrated Moving Average)',
+                'forecaster' : AutoARIMA(sp=1, suppress_warnings=True)
+            }
+        }
+
+
+        predictions = self.getPredictions(forecasters[model]['forecaster'])
+        forecasts = {
+            'code': 200,
+            'model_name' : forecasters[str.lower(model)]['name'],
+            'accuracy_metrics' : self.getAccuracyMetrics(forecasters[model]['forecaster']),
+            'predictions' : predictions[0],
+        }
+
+        # for forecaster_name, forecaster in forecasters.items():
+        #     forecasts[forecaster_name] = {}
+        #     forecasts[forecaster_name] = {}
+        #     forecasts[forecaster_name]['accuracy_metrics'] = self.getAccuracyMetrics(forecaster)
+        #     forecasts[forecaster_name]['predictions'] = self.getPredictions(forecaster)
+        
+        print('Forecasters Completed !')
+        return forecasts
+    
+    def getAllAQIForecastsAtATime(self):
+        
+        forecasters = {
+            'Prophet' : Prophet(yearly_seasonality=True, weekly_seasonality=True),
+            'ExponentialSmoothening' : ExponentialSmoothing(trend="add", seasonal="add", sp=12),
+            'AutoARIMA': AutoARIMA(sp=1, suppress_warnings=True)
+        }
+
+        forecasts = {}
+
+
+        for forecaster_name, forecaster in forecasters.items():
+            forecasts[forecaster_name] = {}
+            forecasts[forecaster_name] = {}
+            forecasts[forecaster_name]['accuracy_metrics'] = self.getAccuracyMetrics(forecaster, forecaster_name)
+            predictions = self.getPredictions(forecaster, forecaster_name)
+
+            forecasts[forecaster_name]['predictions'] = predictions[0]
+            forecasts[forecaster_name]['plots'] = predictions[1]
+        
+        return forecasts
+
+def getOnlyCityData(city_name):
+    #creating AQI data object
+    o = AQIData()
+    # dataset = o.get_historical_data(city="New York")
+    # forecaster = AutoARIMA(sp=1, suppress_warnings=True)
+
+    #creating forecaster Object
+    # forecaster = Prophet(yearly_seasonality=True, weekly_seasonality=True)
+    # forecaster = ThetaForecaster(sp=12)
+
+    #getting historical data of the city
+    data = o.get_historical_data(city=city_name)
+    
+    #for storing final output
+    finalOut = {}
+
+    #if data exists about the city
+    if data != 404:
+
+        dates = [i for i in data[0].index]
+        for i in range(len(dates)):
+            if(dates[i].date() > datetime.now().date()):
+                data[0].drop(index=dates[i].date(), inplace=True)
+
+        dataset = data[0]
+        dataset = dataset.dropna()
+
+        return dataset
+
+
+def getProphetData(city_name):
+
+
+
+    return
 
 def getCityData(city_name):
     #creating AQI data object
@@ -473,6 +739,15 @@ def getCityData(city_name):
         dataset = data[0]
         dataset = dataset.dropna()
 
+        print(dataset)
+
+        dataset.to_csv('Data/dataset.csv', index=False)
+        # return dataset
+    
+        models = Sktime_forecast(dataset)
+
+        predictions = models.getAllAQIForecastsAtATime()
+
         #saving the file locally without index
         # dataset.to_csv(f"Data/{city_name}_data.csv", index=False)
 
@@ -480,9 +755,11 @@ def getCityData(city_name):
         # dataset = pd.read_csv(f"Data/{city_name}_data.csv", parse_dates=[0], index_col=[0])
         # print(dataset)
         #remove future dates in the dateset
+        
 
-        predicted_data = sktime_forecast(dataset=dataset, horizon=30, validation=False)
+        # t = sktime_forecast(dataset=dataset, horizon=30, validation=False)
 
+        # predicted_data, plotImages = t[0], t[1]
 
         #for present day data
         presentDayData = {}
@@ -494,11 +771,12 @@ def getCityData(city_name):
         finalOut = {
             'code' : 200,
             'response' : {
-                "predicted_data" : predicted_data,
+                "predicted_data" : predictions,
                 "presentDayData" : presentDayData,
                 "city_name" : data[1],
                 "city_station" : data[2],
-                "country_code" : data[3]
+                "country_code" : data[3],
+                # "plotImages" : plotImages
             }
         }
 
@@ -507,6 +785,9 @@ def getCityData(city_name):
             'code' : 404
         }
 
+    predictionsDataframe = pd.DataFrame(finalOut)
+
+    predictionsDataframe.to_csv('Data/predictions_data.csv', index=False)
     return finalOut
 
 app = FastAPI()
@@ -523,14 +804,38 @@ async def root():
     json_compatible_item_data = jsonable_encoder({"message": "Hello World"})
     return JSONResponse(content=json_compatible_item_data)
 
+@app.get('/data/{city}')
+async def data(city:str):
+    data = getOnlyCityData(city_name=city)
+
+    print(data)
+    return data
+
+@app.get('/predictions/{city}/{model}')
+async def prophetData(city: str, model: str):
+    print('-----------------------')
+    city_data = requests.get(f'http://127.0.0.1:8000/data/{city}')
+    print('-----------------------')
+
+    string_city_data = city_data.content.decode('utf-8')
+
+    # Step 2: Parse the string into a dictionary
+    dict_city_data = json.loads(string_city_data)
+
+    data = pd.DataFrame(dict_city_data)
+    data = pd.to_datetime(data.index)
+    models = Sktime_forecast(data)
+
+    return JSONResponse(models.getAQIForecasts(model=model))
+
 @app.get('/city/{city}')
 async def city(city:str):
-    o = AQIData()
-    hist = getCityData(city_name=city)
+    # o = AQIData()
+    city_data = getCityData(city_name=city)
     #get the predictions
     # predictions = forecaster.getForecastData(data=hist)
-
-    return JSONResponse(hist)
+    
+    return JSONResponse(city_data)
 
 @app.get('/test/{text}')
 async def test(text:str):

@@ -1,5 +1,12 @@
-import uvicorn
+from fastapi import FastAPI, Cookie
 
-if __name__ == "__main__":
-  uvicorn.run("test:app", host="0.0.0.0", port=8000, reload=True)
-  
+app = FastAPI()
+
+@app.get("/set-cookie/")
+async def set_cookie(param: str):
+    response = {"message": "Cookie set successfully"}
+    return response, {"param": param}
+
+@app.get("/get-cookie/")
+async def get_cookie(param: str = Cookie(None)):
+    return {"param": param}
